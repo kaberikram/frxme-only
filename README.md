@@ -60,16 +60,6 @@ This is a **static site** after build. Typical steps:
 3. Point the company DNS / load balancer at that hosting.
 4. If the app is served from a **subpath** (not the domain root), set Vite’s `base` option in `vite.config.ts` to that path (e.g. `/frxme/`) and rebuild. For the site root (`https://example.com/`), no change is needed.
 
-### Optional: API key (Gemini)
-
-If features that call Gemini are used, create a `.env` file in the project root (do **not** commit secrets):
-
-```bash
-GEMINI_API_KEY=your_key_here
-```
-
-Rebuild after changing environment variables for production.
-
 ---
 
 ## Quick reference
