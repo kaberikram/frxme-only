@@ -1,5 +1,6 @@
 {
   "name": "frxme-only",
+  "description": "Boilerplate FRXME web app (Vite + React) — clone and deploy on your domain",
   "private": true,
   "version": "0.0.0",
   "type": "module",

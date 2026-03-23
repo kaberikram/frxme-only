@@ -1,71 +1,52 @@
-# FRXME Only
+# FRXME Only — boilerplate
 
-Standalone FRXME web experience extracted from `shxft-studio`.
+This repo is a **starter you can clone**, run locally, and **deploy on your own domain**. It is a static [Vite](https://vitejs.dev/) + [React](https://react.dev/) app (with Three.js / R3F for the FRXME experience). Fork it, rename it, or copy it into your org—whatever fits your workflow.
 
-**Repository:** https://github.com/kaberikram/frxme-only (public)
+**Upstream clone URL (example):** `https://github.com/kaberikram/frxme-only.git`
 
 ---
 
-## Instructions for setup and deployment
+## Local development
 
-### 1. Prerequisites
-
-- **Git** — to clone the repository  
-- **Node.js** — use the current **LTS** version (e.g. 20.x or 22.x). Check with `node -v`.  
-- **npm** — comes with Node (`npm -v`)
-
-### 2. Get the code
+**Prerequisites:** Git, Node.js **LTS** (`node -v`), npm (`npm -v`).
 
 ```bash
-git clone https://github.com/kaberikram/frxme-only.git
-cd frxme-only
-```
-
-### 3. Install dependencies
-
-```bash
+git clone <your-repo-url>
+cd <repo-folder>
 npm install
-```
-
-### 4. Run locally (development)
-
-Starts a dev server (default in this project: port **3000**).
-
-```bash
 npm run dev
 ```
 
-Open **http://localhost:3000** in a browser.
+Dev server listens on **port 3000** by default — open `http://localhost:3000`.
 
-### 5. Production build
-
-Creates optimized static files in the `dist/` folder.
+## Production build
 
 ```bash
 npm run build
 ```
 
-To preview the production build on your machine:
+Output goes to **`dist/`**. Preview it locally:
 
 ```bash
 npm run preview
 ```
 
-### 6. Deploy to the company domain
+## Deploy on your domain
 
-This is a **static site** after build. Typical steps:
+After `npm run build`, host the **`dist/`** directory on your stack (object storage + CDN, Netlify, Vercel, nginx, etc.) and point DNS at that hosting.
 
-1. Run `npm run build` in a clean checkout (or in CI).
-2. Deploy the contents of **`dist/`** to your hosting (S3 + CloudFront, Netlify, Vercel, nginx, etc.).
-3. Point the company DNS / load balancer at that hosting.
-4. If the app is served from a **subpath** (not the domain root), set Vite’s `base` option in `vite.config.ts` to that path (e.g. `/frxme/`) and rebuild. For the site root (`https://example.com/`), no change is needed.
+If the site is **not** at the domain root (e.g. `https://example.com/frxme/`), set Vite’s `base` in `vite.config.ts` to that path and rebuild. For `https://example.com/` at the root, leave `base` as default.
 
 ---
 
-## Quick reference
+## Scripts
 
-| Task        | Command        |
-|------------|----------------|
-| Dev server | `npm run dev`  |
-| Build      | `npm run build`|
+| Task | Command |
+|------|---------|
+| Dev server | `npm run dev` |
+| Build | `npm run build` |
 | Preview build | `npm run preview` |
+
+## Origin
+
+Extracted from `shxft-studio` as a standalone FRXME web experience.
