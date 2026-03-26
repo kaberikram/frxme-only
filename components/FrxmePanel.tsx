@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { RoundedBox, useGLTF } from '@react-three/drei'
+import { useGLTF, useVideoTexture } from '@react-three/drei'
 import * as THREE from 'three'
 
 interface FrxmePanelProps {
@@ -19,6 +19,18 @@ function smoothstep(min: number, max: number, value: number) {
   return x * x * (3 - 2 * x)
 }
 
+function shortestAngleDelta(from: number, to: number) {
+  return Math.atan2(Math.sin(to - from), Math.cos(to - from))
+}
+
+function normalizeAngle(value: number) {
+  return Math.atan2(Math.sin(value), Math.cos(value))
+}
+
+function dampValue(current: number, target: number, lambda: number, delta: number) {
+  return THREE.MathUtils.damp(current, target, lambda, delta)
+}
+
 function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelProps) {
   const groupRef = useRef<THREE.Group>(null)
   const logoMaterialRef = useRef<THREE.Material | null>(null)
@@ -28,6 +40,8 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
   const [logoTexture, setLogoTexture] = useState<THREE.Texture | null>(null)
   const [hasLogoTextureResolved, setHasLogoTextureResolved] = useState(false)
   const hasReportedReady = useRef(false)
+  const smoothedProgress = useRef(scrollProgress)
+  const screenVideoTexture = useVideoTexture('/2a13e544-5795-4a4a-98d2-f504b623798d.mp4')
 
   useEffect(() => {
     if (!logoMapUrl) {
@@ -62,11 +76,19 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
     }
   }, [logoMapUrl])
 
+  screenVideoTexture.wrapS = THREE.ClampToEdgeWrapping
+  screenVideoTexture.wrapT = THREE.ClampToEdgeWrapping
+  screenVideoTexture.repeat.set(1, -1)
+  screenVideoTexture.offset.set(0, 1)
+  screenVideoTexture.colorSpace = THREE.SRGBColorSpace
+  screenVideoTexture.needsUpdate = true
+
   targetColor.current.set(color)
 
-  useFrame((_state, delta) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return
 
+    smoothedProgress.current = dampValue(smoothedProgress.current, scrollProgress, 9, delta)
     currentColor.current.lerp(targetColor.current, 1 - Math.pow(0.001, delta))
 
     if (colorMaterialRef.current)
@@ -77,7 +99,7 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
     // Phase 3 (0.45–0.7): Slight 3/4 angle, offset left for specs
     // Phase 4 (0.7–1.0): Return to dead-center front, zoom out for color picker
 
-    const p = scrollProgress
+    const p = smoothedProgress.current
 
     const introZoom = smoothstep(0, 0.15, p)
     const pullback = smoothstep(0.15, 0.45, p)
@@ -99,19 +121,91 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
     const phase4RotY = lerp(0, -phase3RotY, colorPhase)
     const rotY = phase2RotY + phase3RotY + phase4RotY
 
-    const rotX = lerp(0.05, -0.05, pullback) + lerp(0, 0.05, settle) * (1 - colorPhase)
-    const specsOffsetX = lerp(0, -1.5, specsLeftPhase) * (1 - colorPhase)
-    const rightOffsetX = lerp(0, 1.5, rightPhase) * (1 - colorPhase)
-    const colorOffsetX = lerp(0, -1.8, colorPhase)
-    const posX = specsOffsetX + rightOffsetX + colorOffsetX
-    const posZ = lerp(0.5, 0, introZoom) + lerp(0, -1.0, pullback) + lerp(0, -0.5, colorPhase) + lerp(0, -2.5, zoomOut)
-    const posY = lerp(0, 0.2, settle) * (1 - colorPhase) + lerp(0, 0.5, colorPhase) + lerp(0, 0.3, zoomOut)
+    const isMobileViewport = state.size.width < 768
+    const mobileOffsetScale = isMobileViewport ? 0.38 : 1
+    const mobileDepthOffset = isMobileViewport ? 0.45 : 0
+    const mobileLiftOffset = isMobileViewport ? 0.15 : 0
 
-    groupRef.current.rotation.y += (rotY - groupRef.current.rotation.y) * 0.08
-    groupRef.current.rotation.x += (rotX - groupRef.current.rotation.x) * 0.08
-    groupRef.current.position.x += (posX - groupRef.current.position.x) * 0.08
-    groupRef.current.position.z += (posZ - groupRef.current.position.z) * 0.08
-    groupRef.current.position.y += (posY - groupRef.current.position.y) * 0.08
+    const mobileSpecsFocus =
+      isMobileViewport
+        ? smoothstep(0.33, 0.43, p) * (1 - smoothstep(0.52, 0.6, p))
+        : 0
+    const mobilePurposeFocus =
+      isMobileViewport
+        ? smoothstep(0.54, 0.62, p) * (1 - smoothstep(0.74, 0.82, p))
+        : 0
+    const mobilePurposeLockX =
+      isMobileViewport
+        ? smoothstep(0.48, 0.56, p) * (1 - smoothstep(0.9, 0.94, p))
+        : 0
+    const mobileFeatureFocus =
+      isMobileViewport
+        ? smoothstep(0.74, 0.8, p) * (1 - smoothstep(0.86, 0.9, p))
+        : 0
+    const mobileInfoHoldFocus =
+      isMobileViewport
+        ? smoothstep(0.54, 0.62, p) * (1 - smoothstep(0.9, 0.94, p))
+        : 0
+    const mobileInfoZHoldFocus =
+      isMobileViewport
+        ? smoothstep(0.35, 0.45, p) * (1 - smoothstep(0.9, 0.94, p))
+        : 0
+    const mobileCustomizeFocus =
+      isMobileViewport
+        ? smoothstep(0.85, 0.9, p)
+        : 0
+    const mobileInfoFocus = Math.max(mobileSpecsFocus, mobilePurposeFocus, mobileFeatureFocus, mobileInfoHoldFocus)
+    const mobileCenterAll = Math.max(mobileInfoFocus, mobileCustomizeFocus)
+    const mobileCenterX = Math.max(mobileCenterAll, mobilePurposeLockX)
+
+    const normalizedRotY = normalizeAngle(rotY)
+    const normalizedSpecsRotY = normalizeAngle(phase3RotY)
+    const mobileRotY = lerp(
+      lerp(normalizedRotY, normalizedSpecsRotY, mobileInfoFocus),
+      0,
+      mobileCustomizeFocus
+    )
+    const targetRotY = isMobileViewport ? mobileRotY : normalizedRotY
+
+    const rotX = lerp(0.05, -0.05, pullback) + lerp(0, 0.05, settle) * (1 - colorPhase)
+    const specsOffsetX = lerp(0, -1.5, specsLeftPhase) * (1 - colorPhase) * mobileOffsetScale
+    const rightOffsetX = lerp(0, 1.5, rightPhase) * (1 - colorPhase) * mobileOffsetScale
+    const colorOffsetX = lerp(0, -1.8, colorPhase) * mobileOffsetScale
+    const basePosX = specsOffsetX + rightOffsetX + colorOffsetX
+    const posX = lerp(basePosX, 0, mobileCenterX)
+
+    const basePosZ =
+      lerp(0.5, 0, introZoom) +
+      lerp(0, -1.0, pullback) +
+      lerp(0, -0.5, colorPhase) +
+      lerp(0, -2.5, zoomOut) +
+      mobileDepthOffset
+    const mobileInfoTargetZ = lerp(0.5, 0, 1) + lerp(0, -1.0, 1) + mobileDepthOffset - 0.65
+    const mobileTargetZ = lerp(0.5, 0, 1) + lerp(0, -1.0, 1) + mobileDepthOffset - 0.65 - 2.4
+    const infoPosZ = lerp(basePosZ, mobileInfoTargetZ, mobileInfoZHoldFocus)
+    const posZ = lerp(infoPosZ, mobileTargetZ, mobileCustomizeFocus)
+
+    const basePosY =
+      lerp(0, 0.2, settle) * (1 - colorPhase) +
+      lerp(0, 0.5, colorPhase) +
+      lerp(0, 0.3, zoomOut) +
+      mobileLiftOffset
+    const mobileTargetY = mobileLiftOffset + 1.3
+    const posY = lerp(basePosY + lerp(0, -0.08, mobileInfoFocus), mobileTargetY, mobileCustomizeFocus)
+
+    const rotLambda = mobileCenterAll > 0.5 ? 13 : 10
+    const posLambda = mobileCenterAll > 0.5 ? 15 : 9
+
+    groupRef.current.rotation.y = dampValue(
+      groupRef.current.rotation.y,
+      groupRef.current.rotation.y + shortestAngleDelta(groupRef.current.rotation.y, targetRotY),
+      rotLambda,
+      delta
+    )
+    groupRef.current.rotation.x = dampValue(groupRef.current.rotation.x, rotX, rotLambda, delta)
+    groupRef.current.position.x = dampValue(groupRef.current.position.x, posX, posLambda, delta)
+    groupRef.current.position.z = dampValue(groupRef.current.position.z, posZ, posLambda, delta)
+    groupRef.current.position.y = dampValue(groupRef.current.position.y, posY, posLambda, delta)
   })
 
   const { scene: glbScene } = useGLTF('/frxme_low_poly.glb')
@@ -157,6 +251,29 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
           standardMaterial.needsUpdate = true
         }
 
+        if (material.name === 'm_screen' && material instanceof THREE.MeshStandardMaterial) {
+          material.map = null
+          material.alphaMap = null
+          material.aoMap = null
+          material.bumpMap = null
+          material.displacementMap = null
+          material.emissiveMap = null
+          material.lightMap = null
+          material.metalnessMap = null
+          material.normalMap = null
+          material.roughnessMap = null
+          material.envMap = null
+          material.color.set('#ffffff')
+          material.metalness = 0
+          material.roughness = 1
+          material.emissive.set('#ffffff')
+          material.emissiveIntensity = 1
+          material.map = screenVideoTexture
+          material.emissiveMap = screenVideoTexture
+          material.toneMapped = false
+          material.needsUpdate = true
+        }
+
         if (
           material.name !== 'm_logo' &&
           material.name !== 'm_screen' &&
@@ -169,7 +286,7 @@ function FrxmePanel({ scrollProgress, color, logoMapUrl, onReady }: FrxmePanelPr
         }
       })
     })
-  }, [glbScene, logoTexture])
+  }, [glbScene, logoTexture, screenVideoTexture])
 
   return (
     <group ref={groupRef}>

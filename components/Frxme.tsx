@@ -113,7 +113,7 @@ function Frxme() {
   const colorPickerOpacity = smoothstep(0.75, 0.8, progress) * (1 - smoothstep(0.8, 0.85, progress))
   const featuresOpacity = smoothstep(0.85, 0.9, progress) * (1 - smoothstep(0.9, 0.95, progress))
   const logoPickerOpacity = smoothstep(0.95, 0.97, progress)
-  const ctaOpacity = smoothstep(0.97, 1, progress)
+  const ctaOpacity = logoPickerOpacity
 
   const handleSceneReady = useCallback(() => {
     requestAnimationFrame(() => {
@@ -218,7 +218,7 @@ function Frxme() {
         />
 
         {/* Progress indicator */}
-        <div className="absolute top-20 right-6 md:right-12 z-20 pointer-events-none">
+        <div className="absolute top-20 right-6 md:right-12 z-20 pointer-events-none hidden md:block">
           <div className="w-px h-24 bg-white/20 relative">
             <div
               className="absolute top-0 left-0 w-full bg-white"
@@ -290,17 +290,17 @@ function Frxme() {
 
         {/* Phase 3: Specs */}
         <div
-          className="absolute inset-0 flex items-center justify-end pointer-events-none z-10"
+          className="absolute inset-0 flex items-end md:items-center justify-center md:justify-end pointer-events-none z-10"
           style={{ opacity: specsOpacity }}
         >
-          <div className="w-full md:w-1/2 lg:w-5/12 px-6 md:px-12">
-            <div>
+          <div className="w-full md:w-1/2 lg:w-5/12 px-4 md:px-12 pb-8 md:pb-0">
+            <div className="bg-black/40 backdrop-blur-sm border border-white/10 p-4 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-0">
               <Mono className="text-white/40 mb-6">[ Specifications ]</Mono>
               <div className="space-y-4">
                 {SPECS.map((spec) => (
-                  <div key={spec.label} className="flex justify-between items-baseline border-b border-white/10 pb-3">
-                    <span className="font-mono text-xs uppercase tracking-wider text-white/40">{spec.label}</span>
-                    <span className="font-mono text-sm font-bold">{spec.value}</span>
+                  <div key={spec.label} className="flex flex-col md:flex-row md:justify-between md:items-baseline gap-1 md:gap-0 border-b border-white/10 pb-3">
+                    <span className="font-mono text-[11px] md:text-xs uppercase tracking-wider text-white/40">{spec.label}</span>
+                    <span className="font-mono text-sm md:text-sm font-bold">{spec.value}</span>
                   </div>
                 ))}
               </div>
@@ -311,36 +311,37 @@ function Frxme() {
         
         {/* Phase 4: Purpose / Use Case */}
         <div
-          className="absolute inset-0 flex items-center justify-start pointer-events-none z-10"
+          className="absolute inset-0 flex items-end md:items-center justify-center md:justify-start pointer-events-none z-10"
           style={{ opacity: purposeOpacity }}
         >
-          <div className="w-full md:w-1/2 lg:w-5/12 px-6 md:px-12">
-            <div>
+          <div className="w-full md:w-1/2 lg:w-5/12 px-4 md:px-12 pb-8 md:pb-0">
+            <div className="bg-black/40 backdrop-blur-sm border border-white/10 p-4 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-0">
               <Mono className="text-white/40 mb-6">[ Purpose / Use Case ]</Mono>
-              <p className="text-sm md:text-base text-white/50 font-mono leading-relaxed">
+              <p className="text-sm md:text-base text-white/60 md:text-white/50 font-mono leading-relaxed">
                 For events, retail, festivals and brand activations—where brands want attention, participation and shareability. Turns passive viewers into active participants.
               </p>
             </div>
           </div>
         </div>{/* Phase 5: Color picker (docked to right so FRXME stays unobstructed) */}
         <div
-          className="absolute inset-0 flex items-center justify-end z-10"
+          className="absolute inset-0 flex items-end md:items-center justify-center md:justify-end z-10"
           style={{
             opacity: featuresOpacity,
             pointerEvents: featuresOpacity > 0.5 ? 'auto' : 'none',
           }}
         >
-          <div className="w-full max-w-xs md:max-w-sm mr-6 md:mr-12 px-5 py-5 md:py-6">
+          <div className="w-full max-w-sm md:max-w-sm mr-0 md:mr-12 px-4 md:px-5 pb-28 md:pb-0">
+            <div className="bg-black/45 backdrop-blur-sm border border-white/10 p-4 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-0">
             <Mono className="text-white/40 mb-2">[ Finish ]</Mono>
             <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-4">
               Choose Your Color
             </h3>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex gap-2 overflow-x-auto px-1 py-1 md:gap-4 md:p-0 md:pb-0 md:flex-wrap md:overflow-visible [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {COLOR_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setSelectedColor(opt.value)}
-                  className="group flex flex-col items-center gap-1"
+                  className="group shrink-0 flex flex-col items-center gap-1 min-w-[48px] min-h-[48px] md:min-w-[56px] md:min-h-[52px]"
                 >
                   <div
                     className="w-8 h-8 md:w-9 md:h-9 rounded-full border-2 transition-all duration-300"
@@ -356,7 +357,7 @@ function Frxme() {
                     }}
                   />
                   <span
-                    className="font-mono text-[9px] uppercase tracking-wider transition-colors duration-300"
+                    className="font-mono text-[10px] md:text-[9px] uppercase tracking-[0.08em] md:tracking-wider transition-colors duration-300"
                     style={{
                       color:
                         selectedColor === opt.value ? '#ffffff' : 'rgba(255,255,255,0.4)',
@@ -367,19 +368,20 @@ function Frxme() {
                 </button>
               ))}
             </div>
+            </div>
           </div>
         </div>
 
         
         {/* Phase 6: Features */}
         <div
-          className="absolute inset-0 flex items-center justify-start pointer-events-none z-10"
+          className="absolute inset-0 flex items-end md:items-center justify-center md:justify-start pointer-events-none z-10"
           style={{ opacity: colorPickerOpacity }}
         >
-          <div className="w-full md:w-1/2 lg:w-5/12 px-6 md:px-12">
-            <div>
+          <div className="w-full md:w-1/2 lg:w-5/12 px-4 md:px-12 pb-8 md:pb-0">
+            <div className="bg-black/40 backdrop-blur-sm border border-white/10 p-4 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-0">
               <Mono className="text-white/40 mb-6">[ Features ]</Mono>
-              <ul className="text-sm md:text-base text-white/50 font-mono leading-relaxed space-y-2">
+              <ul className="text-sm md:text-base text-white/60 md:text-white/50 font-mono leading-relaxed space-y-2">
                 <li>• Fully branded design</li>
                 <li>• Custom AR characters & environments</li>
                 <li>• Interactive games & challenges</li>
@@ -390,27 +392,28 @@ function Frxme() {
           </div>
         </div>{/* Phase 7: Logo picker (also docked to right) */}
         <div
-          className="absolute inset-0 flex items-center justify-end z-10"
+          className="absolute inset-0 flex items-end md:items-center justify-center md:justify-end z-10"
           style={{
             opacity: logoPickerOpacity,
             pointerEvents: logoPickerOpacity > 0.5 ? 'auto' : 'none',
           }}
         >
-          <div className="w-full max-w-xs md:max-w-sm mr-6 md:mr-12 px-5 py-6">
+          <div className="w-full max-w-sm md:max-w-sm mr-0 md:mr-12 px-4 md:px-5 pb-20 md:pb-0">
+            <div className="bg-black/45 backdrop-blur-sm border border-white/10 p-3 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-0">
             <Mono className="text-white/40 mb-2">[ Branding ]</Mono>
             <h3 className="text-lg md:text-xl font-bold uppercase tracking-tight mb-2">
               Apply a Logo
             </h3>
-            <p className="text-[9px] md:text-[10px] font-mono text-white/40 uppercase tracking-widest mb-4">
+            <p className="text-[11px] md:text-[10px] font-mono text-white/40 uppercase tracking-widest mb-3">
               Mapped to the front base panel
             </p>
 
-            <div className="flex items-center gap-4 md:gap-5 mb-4">
+            <div className="flex items-center gap-3 md:gap-5 mb-3 overflow-x-auto pb-2 md:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {/* Default 1 */}
               <button
                 type="button"
                 onClick={() => setSelectedLogo('default1')}
-                className="group flex flex-col items-center gap-2"
+                className="group flex flex-col items-center gap-2 min-w-[84px]"
               >
                 <div
                   className="w-16 h-10 md:w-20 md:h-12 border-2 bg-white/5 flex items-center justify-center transition-all duration-300"
@@ -430,7 +433,7 @@ function Frxme() {
                   </span>
                 </div>
                 <span
-                  className="font-mono text-[10px] uppercase tracking-wider"
+                  className="font-mono text-[11px] md:text-[10px] uppercase tracking-wider"
                   style={{
                     color:
                       selectedLogo === 'default1'
@@ -446,7 +449,7 @@ function Frxme() {
               <button
                 type="button"
                 onClick={() => setSelectedLogo('default2')}
-                className="group flex flex-col items-center gap-2"
+                className="group flex flex-col items-center gap-2 min-w-[84px]"
               >
                 <div
                   className="w-16 h-10 md:w-20 md:h-12 border-2 bg-white/5 flex items-center justify-center transition-all duration-300"
@@ -466,7 +469,7 @@ function Frxme() {
                   </span>
                 </div>
                 <span
-                  className="font-mono text-[10px] uppercase tracking-wider"
+                  className="font-mono text-[11px] md:text-[10px] uppercase tracking-wider"
                   style={{
                     color:
                       selectedLogo === 'default2'
@@ -482,7 +485,7 @@ function Frxme() {
               <button
                 type="button"
                 onClick={handleCustomLogoClick}
-                className="group flex flex-col items-center gap-2"
+                className="group flex flex-col items-center gap-2 min-w-[84px]"
               >
                 <div
                   className="w-16 h-10 md:w-20 md:h-12 border-2 border-dashed flex items-center justify-center transition-all duration-300"
@@ -503,7 +506,7 @@ function Frxme() {
                   </span>
                 </div>
                 <span
-                  className="font-mono text-[10px] uppercase tracking-wider"
+                  className="font-mono text-[11px] md:text-[10px] uppercase tracking-wider"
                   style={{
                     color:
                       selectedLogo === 'custom'
@@ -524,15 +527,16 @@ function Frxme() {
               onChange={handleLogoFileChange}
             />
 
-            <div className="mt-4 flex flex-col items-center gap-1">
-              <p className="font-mono text-[9px] text-white/30 uppercase tracking-widest">
+            <div className="mt-3 flex flex-col items-center gap-1">
+              <p className="font-mono text-[11px] md:text-[9px] text-white/30 uppercase tracking-widest text-center">
                 Recommended: 1024×1024 PNG with alpha
               </p>
               {logoError && (
-                <p className="font-mono text-[9px] text-red-400 uppercase tracking-widest">
+                <p className="font-mono text-[11px] md:text-[9px] text-red-400 uppercase tracking-widest text-center">
                   {logoError}
                 </p>
               )}
+            </div>
             </div>
           </div>
         </div>
@@ -541,7 +545,7 @@ function Frxme() {
 
       {/* Bottom CTA (end of scroll only) */}
       <div
-        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 transition-opacity duration-500"
+        className="fixed bottom-[max(env(safe-area-inset-bottom),1rem)] right-1/2 translate-x-1/2 md:translate-x-0 md:right-10 md:bottom-10 z-50 transition-opacity duration-500"
         style={{
           opacity: ctaOpacity,
           pointerEvents: ctaOpacity > 0.5 ? 'auto' : 'none',
